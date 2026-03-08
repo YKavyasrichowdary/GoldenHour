@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { EmergencyCase, Severity, ReadinessStatus } from '../types';
-import { Activity, Clock, CheckCircle, User, Heart, Wind, Thermometer, AlertCircle, Info, Image, ExternalLink, FileText, ShieldCheck } from 'lucide-react';
+import { Activity, CheckCircle, User, Heart, Wind, Thermometer, AlertCircle, Info, Image, FileText, ShieldCheck } from 'lucide-react';
 import ImageModal from '../components/ImageModal';
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
 }
 
 const HospitalDashboard: React.FC<Props> = ({ activeCase, updateCase }) => {
+
   const [activeTab, setActiveTab] = useState<'info' | 'medical' | 'telemetry'>('info');
   const [selectedPhoto, setSelectedPhoto] = useState<{ src: string, title: string } | null>(null);
   const [livePulse, setLivePulse] = useState(activeCase.vitals.pulse);
@@ -18,9 +19,10 @@ const HospitalDashboard: React.FC<Props> = ({ activeCase, updateCase }) => {
       const interval = setInterval(() => {
         setLivePulse(
           activeCase.vitals.pulse +
-            (activeCase.vitals.pulse > 0 ? Math.floor(Math.random() * 3) - 1 : 0)
+          (activeCase.vitals.pulse > 0 ? Math.floor(Math.random() * 3) - 1 : 0)
         );
       }, 1000);
+
       return () => clearInterval(interval);
     }
   }, [activeTab, activeCase.vitals.pulse]);
@@ -39,258 +41,302 @@ const HospitalDashboard: React.FC<Props> = ({ activeCase, updateCase }) => {
       : 'emerald';
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto flex flex-col gap-8 animate-in fade-in duration-500 pb-24 relative z-10">
-      
-      {selectedPhoto && (
-        <ImageModal
-          src={selectedPhoto.src}
-          title={selectedPhoto.title}
-          onClose={() => setSelectedPhoto(null)}
-        />
-      )}
 
-      {/* HEADER */}
-      <div className={`bg-white border-2 border-${statusColor}-100 p-8 rounded-[3rem] shadow-2xl flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden`}>
+<div className="p-4 md:p-8 max-w-7xl mx-auto flex flex-col gap-8 animate-in fade-in duration-500 pb-24 relative z-10">
 
-        <div className={`absolute left-0 top-0 bottom-0 w-3 bg-${statusColor}-600`} />
+{selectedPhoto && (
+<ImageModal
+src={selectedPhoto.src}
+title={selectedPhoto.title}
+onClose={() => setSelectedPhoto(null)}
+/>
+)}
 
-        <div className="flex items-center gap-8">
-          
-          <div className={`w-24 h-24 rounded-[2rem] bg-${statusColor}-600 text-white flex flex-col items-center justify-center`}>
-            <span className="text-4xl font-black italic">{activeCase.eta}</span>
-            <span className="text-[10px] font-black uppercase">Mins</span>
-          </div>
+{/* HEADER */}
 
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              
-              <h1 className="text-3xl font-black text-slate-950 uppercase italic">
-                Inbound Node: {activeCase.ambulanceId}
-              </h1>
+<div className={`bg-white border-2 border-${statusColor}-100 p-8 rounded-[3rem] shadow-2xl flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden`}>
 
-              {activeCase.identity.isPoliceVerified && (
-                <div className="px-3 py-1 bg-emerald-100 text-emerald-600 rounded-xl text-[9px] font-black uppercase flex items-center gap-1.5 border border-emerald-200">
-                  <ShieldCheck size={12} /> Authority Sync OK
-                </div>
-              )}
+<div className={`absolute left-0 top-0 bottom-0 w-3 bg-${statusColor}-600`} />
 
-            </div>
+<div className="flex items-center gap-8">
 
-            <div className="flex flex-wrap items-center gap-4">
+<div className={`w-24 h-24 rounded-[2rem] bg-${statusColor}-600 text-white flex flex-col items-center justify-center`}>
+<span className="text-4xl font-black italic">{activeCase.eta}</span>
+<span className="text-[10px] font-black uppercase">Mins</span>
+</div>
 
-              <span className="flex items-center gap-2 px-4 py-1.5 bg-slate-50 rounded-xl text-xs font-bold border border-slate-100 uppercase">
-                <User size={14} className="text-blue-500" />
-                {activeCase.isUnknown
-                  ? 'Session UID: ' + activeCase.identity.temporaryId
-                  : activeCase.identity.name}
-              </span>
+<div>
 
-              <span className="flex items-center gap-2 px-4 py-1.5 bg-slate-50 rounded-xl text-xs font-bold border border-slate-100 uppercase">
-                <AlertCircle size={14} className="text-red-500" />
-                {activeCase.severity} Priority Node
-              </span>
+<div className="flex items-center gap-3 mb-2">
 
-            </div>
-          </div>
-        </div>
+<h1 className="text-3xl font-black text-slate-950 uppercase italic">
+Inbound Node: {activeCase.ambulanceId}
+</h1>
 
-        {/* TABS */}
-        <div className="flex flex-wrap gap-2 p-1.5 bg-slate-50 rounded-2xl border border-slate-100">
-          {[
-            { id: 'info', icon: Info, label: 'Admission' },
-            { id: 'medical', icon: FileText, label: 'Nurse Feedback' },
-            { id: 'telemetry', icon: Activity, label: 'Live Mesh' }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 ${
-                activeTab === tab.id
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-400 hover:text-slate-900'
-              }`}
-            >
-              <tab.icon size={14} /> {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+{activeCase.identity.isPoliceVerified && (
+<div className="px-3 py-1 bg-emerald-100 text-emerald-600 rounded-xl text-[9px] font-black uppercase flex items-center gap-1.5 border border-emerald-200">
+<ShieldCheck size={12} /> Authority Sync OK
+</div>
+)}
 
-      {/* GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+</div>
 
-        <div className="lg:col-span-2 space-y-8">
+<div className="flex flex-wrap items-center gap-4">
 
-          {/* INFO TAB */}
-          {activeTab === 'info' && (
-            <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200">
-              
-              <h2 className="text-xl font-black mb-8">
-                Clinical Intelligence Node
-              </h2>
+<span className="flex items-center gap-2 px-4 py-1.5 bg-slate-50 rounded-xl text-xs font-bold border border-slate-100 uppercase">
+<User size={14} className="text-blue-500" />
+{activeCase.isUnknown
+? 'Session UID: ' + activeCase.identity.temporaryId
+: activeCase.identity.name}
+</span>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+<span className="flex items-center gap-2 px-4 py-1.5 bg-slate-50 rounded-xl text-xs font-bold border border-slate-100 uppercase">
+<AlertCircle size={14} className="text-red-500" />
+{activeCase.severity} Priority Node
+</span>
 
-                <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
-                  <span className="text-[9px] font-black text-slate-400 uppercase block mb-4">
-                    Authenticated Identity Stream
-                  </span>
+</div>
+</div>
+</div>
 
-                  <p className="text-2xl font-black">
-                    {activeCase.isUnknown
-                      ? 'Forensic Inquiry: ' + activeCase.identity.temporaryId
-                      : activeCase.identity.name}
-                  </p>
-                </div>
+{/* TABS */}
 
-                <div
-                  onClick={() =>
-                    activeCase.evidence.patientPhoto &&
-                    setSelectedPhoto({
-                      src: activeCase.evidence.patientPhoto,
-                      title: 'Admission Biometric Capture'
-                    })
-                  }
-                  className="aspect-square bg-slate-100 rounded-[3rem] border overflow-hidden cursor-pointer"
-                >
-                  {activeCase.evidence.patientPhoto ? (
-                    <img
-                      src={activeCase.evidence.patientPhoto}
-                      className="w-full h-full object-cover"
-                      alt="Patient"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-300">
-                      <Image size={48} />
-                    </div>
-                  )}
-                </div>
+<div className="flex flex-wrap gap-2 p-1.5 bg-slate-50 rounded-2xl border border-slate-100">
 
-              </div>
-            </div>
-          )}
+{[
+{ id: 'info', icon: Info, label: 'Admission' },
+{ id: 'medical', icon: FileText, label: 'Nurse Feedback' },
+{ id: 'telemetry', icon: Activity, label: 'Live Mesh' }
+].map((tab) => (
 
-          {/* MEDICAL TAB */}
-          {activeTab === 'medical' && (
-            <div className="bg-white p-10 rounded-[3rem] border border-slate-200 space-y-8">
+<button
+key={tab.id}
+onClick={() => setActiveTab(tab.id as any)}
+className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 ${
+activeTab === tab.id
+? 'bg-slate-900 text-white'
+: 'text-slate-400 hover:text-slate-900'
+}`}
+>
 
-              <h2 className="text-xl font-black flex items-center gap-3">
-                <FileText className="text-blue-600" size={24} />
-                Nurse Clinical Feedback
-              </h2>
+<tab.icon size={14} /> {tab.label}
 
-              <div>
-                <p className="text-xs text-slate-400 uppercase mb-2">
-                  Trauma Presentation Log
-                </p>
-                <p className="text-xl font-bold">
-                  {activeCase.medicalCondition.injuries ||
-                    'No trauma reported'}
-                </p>
-              </div>
+</button>
 
-              <div>
-                <p className="text-xs text-slate-400 uppercase mb-2">
-                  Field Symptom Matrix
-                </p>
-                <p className="text-xl font-bold">
-                  {activeCase.medicalCondition.symptoms ||
-                    'Awaiting EMS update'}
-                </p>
-              </div>
+))}
 
-              <div>
-                <p className="text-xs text-slate-400 uppercase mb-2">
-                  EMS Treatment
-                </p>
-                <p className="text-xl font-bold">
-                  {activeCase.medicalCondition.treatment ||
-                    'No treatment recorded'}
-                </p>
-              </div>
+</div>
+</div>
 
-            </div>
-          )}
+{/* GRID */}
 
-          {/* TELEMETRY TAB */}
-          {activeTab === 'telemetry' && (
-            <div className="bg-white p-12 rounded-[3rem] border border-slate-200">
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-              <h2 className="text-xl font-black flex items-center gap-3">
-                <Activity className="text-red-600" size={24} />
-                Field Telemetry Feed
-              </h2>
+<div className="lg:col-span-2 space-y-8">
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mt-10">
+{/* ADMISSION TAB */}
 
-                {[
-                  { label: 'Pulse Rate', val: livePulse, unit: 'BPM', icon: Heart },
-                  { label: 'BP Systolic', val: activeCase.vitals.bp_sys, unit: 'mmHg', icon: Activity },
-                  { label: 'O2 Saturation', val: activeCase.vitals.spo2 + '%', unit: 'SpO2', icon: Wind },
-                  { label: 'Core Temp', val: activeCase.vitals.temp, unit: '°C', icon: Thermometer }
-                ].map((v) => (
-                  <div key={v.label}>
-                    <div className="text-[10px] font-black uppercase">
-                      {v.label}
-                    </div>
-                    <div className="text-6xl font-black">{v.val || '--'}</div>
-                    <div className="text-[10px] uppercase">{v.unit}</div>
-                  </div>
-                ))}
+{activeTab === 'info' && (
 
-              </div>
-            </div>
-          )}
+<div className="bg-white p-10 rounded-[2.5rem] border border-slate-200">
 
-        </div>
+<h2 className="text-xl font-black mb-8">
+Clinical Intelligence Node
+</h2>
 
-        {/* RIGHT PANEL */}
-        <div className="space-y-8">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-          <div className="bg-slate-950 p-12 rounded-[3rem] border border-slate-800">
+<div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
 
-            <h3 className="text-[11px] font-black text-slate-600 uppercase mb-12">
-              Clinical Readiness Matrix
-            </h3>
+<span className="text-[9px] font-black text-slate-400 uppercase block mb-4">
+Authenticated Identity Stream
+</span>
 
-            <div className="space-y-5">
+<p className="text-2xl font-black">
 
-              {[
-                { key: 'icu', label: 'ICU Recovery Unit' },
-                { key: 'blood', label: 'Blood Node Arranged' },
-                { key: 'specialist', label: 'Clinical Specialist' },
-                { key: 'equipment', label: 'Trauma Bay Triage' },
-                { key: 'medicines', label: 'Clinical Pharmacy' }
-              ].map((item) => (
-                <button
-                  key={item.key}
-                  onClick={() => toggleReadiness(item.key as any)}
-                  className={`w-full p-7 rounded-3xl flex justify-between border-2 ${
-                    activeCase.readiness[item.key as keyof ReadinessStatus]
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-white/5 text-slate-500'
-                  }`}
-                >
-                  <span className="font-black text-[11px] uppercase">
-                    {item.label}
-                  </span>
+{activeCase.isUnknown
+? 'Forensic Inquiry: ' + activeCase.identity.temporaryId
+: activeCase.identity.name}
 
-                  {activeCase.readiness[item.key as keyof ReadinessStatus] ? (
-                    <CheckCircle size={20} />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full border-2 border-slate-800" />
-                  )}
+</p>
 
-                </button>
-              ))}
+</div>
 
-            </div>
-          </div>
+<div
+onClick={() =>
+activeCase.evidence.patientPhoto &&
+setSelectedPhoto({
+src: activeCase.evidence.patientPhoto,
+title: 'Admission Biometric Capture'
+})
+}
+className="aspect-square bg-slate-100 rounded-[3rem] border overflow-hidden cursor-pointer"
+>
 
-        </div>
-      </div>
-    </div>
-  );
+{activeCase.evidence.patientPhoto ? (
+
+<img
+src={activeCase.evidence.patientPhoto}
+className="w-full h-full object-cover"
+alt="Patient"
+/>
+
+) : (
+
+<div className="w-full h-full flex items-center justify-center text-slate-300">
+<Image size={48} />
+</div>
+
+)}
+
+</div>
+
+</div>
+</div>
+
+)}
+
+{/* NURSE FEEDBACK TAB */}
+
+{activeTab === 'medical' && (
+
+<div className="bg-white p-10 rounded-[3rem] border border-slate-200 space-y-10">
+
+<h2 className="text-xl font-black flex items-center gap-3">
+<FileText className="text-blue-600" size={24} />
+Nurse Clinical Feedback
+</h2>
+
+<div className="bg-slate-50 border border-slate-200 rounded-[2.5rem] p-10 space-y-10">
+
+<div className="flex gap-6">
+<div className="w-1 bg-red-600 rounded-full" />
+<div>
+<p className="text-[10px] font-black text-slate-400 uppercase mb-2">
+Trauma Presentation Log
+</p>
+<p className="text-2xl font-black italic">
+{activeCase.medicalCondition.injuries || 'No primary trauma reported by ambulance node.'}
+</p>
+</div>
+</div>
+
+<div className="flex gap-6">
+<div className="w-1 bg-yellow-500 rounded-full" />
+<div>
+<p className="text-[10px] font-black text-slate-400 uppercase mb-2">
+Field Symptom Matrix
+</p>
+<p className="text-2xl font-black italic">
+{activeCase.medicalCondition.symptoms || 'Awaiting clinical log updates from EMS.'}
+</p>
+</div>
+</div>
+
+</div>
+
+<div className="p-10 bg-blue-900 rounded-[3rem] text-white shadow-xl">
+<p className="text-[10px] font-black text-blue-300 uppercase mb-3">
+EMS Administered Matrix
+</p>
+<p className="text-xl font-bold italic">
+"{activeCase.medicalCondition.treatment || 'No specific field interventions synchronized for this registry context.'}"
+</p>
+</div>
+
+</div>
+
+)}
+
+{/* LIVE MESH TAB */}
+
+{activeTab === 'telemetry' && (
+
+<div className="bg-white p-12 rounded-[3rem] border border-slate-200">
+
+<h2 className="text-xl font-black flex items-center gap-3">
+<Activity className="text-red-600" size={24} />
+Field Telemetry Feed
+</h2>
+
+<div className="grid grid-cols-2 md:grid-cols-4 gap-12 mt-10">
+
+{[
+{ label: 'Pulse Rate', val: livePulse, unit: 'BPM' },
+{ label: 'BP Systolic', val: activeCase.vitals.bp_sys, unit: 'mmHg' },
+{ label: 'O2 Saturation', val: activeCase.vitals.spo2 + '%', unit: 'SpO2' },
+{ label: 'Core Temp', val: activeCase.vitals.temp, unit: '°C' }
+].map((v) => (
+
+<div key={v.label}>
+<div className="text-[10px] font-black uppercase">{v.label}</div>
+<div className="text-6xl font-black">{v.val || '--'}</div>
+<div className="text-[10px] uppercase">{v.unit}</div>
+</div>
+
+))}
+
+</div>
+</div>
+
+)}
+
+</div>
+
+{/* RIGHT PANEL */}
+
+<div className="space-y-8">
+
+<div className="bg-slate-950 p-12 rounded-[3rem] border border-slate-800">
+
+<h3 className="text-[11px] font-black text-slate-600 uppercase mb-12">
+Clinical Readiness Matrix
+</h3>
+
+<div className="space-y-5">
+
+{[
+{ key: 'icu', label: 'ICU Recovery Unit' },
+{ key: 'blood', label: 'Blood Node Arranged' },
+{ key: 'specialist', label: 'Clinical Specialist' },
+{ key: 'equipment', label: 'Trauma Bay Triage' },
+{ key: 'medicines', label: 'Clinical Pharmacy' }
+].map((item) => (
+
+<button
+key={item.key}
+onClick={() => toggleReadiness(item.key as any)}
+className={`w-full p-7 rounded-3xl flex justify-between border-2 ${
+activeCase.readiness[item.key as keyof ReadinessStatus]
+? 'bg-emerald-600 text-white'
+: 'bg-white/5 text-slate-500'
+}`}
+>
+
+<span className="font-black text-[11px] uppercase">
+{item.label}
+</span>
+
+{activeCase.readiness[item.key as keyof ReadinessStatus] ? (
+<CheckCircle size={20} />
+) : (
+<div className="w-5 h-5 rounded-full border-2 border-slate-800" />
+)}
+
+</button>
+
+))}
+
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+);
 };
 
 export default HospitalDashboard;
