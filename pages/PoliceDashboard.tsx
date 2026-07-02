@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { EmergencyCase, Severity, PatientIdentity } from '../types';
 // Fixed: Added missing 'Phone' icon to imports
-import { Shield, Camera, UserX, UserCheck, AlertTriangle, Loader2, Info, MapPin, Hospital, User, Zap, CheckCircle, Database, Maximize2, ExternalLink, Scale, FileBadge, UserCheck2, FileText, ArrowRight, Clock, Phone } from 'lucide-react';
+import { Shield, Camera, UserX, UserCheck, AlertTriangle, Loader2, Info, MapPin, Hospital, User, Zap, CheckCircle, Database, Maximize2, ExternalLink, Scale, FileBadge, UserCheck2, FileText, ArrowRight, Clock, Phone, Download } from 'lucide-react';
 import { getPoliceIdentityClues } from '../services/gemini';
 import ImageModal from '../components/ImageModal';
+import { jsPDF } from 'jspdf';
 
 interface Props {
   activeCase: EmergencyCase;
@@ -21,7 +22,7 @@ const PoliceDashboard: React.FC<Props> = ({ activeCase, updateCase }) => {
   // Local state for verification form
   const [formData, setFormData] = useState({
     name: '', age: '', gender: '', address: '', govIdType: 'Aadhar',
-    govIdNumber: '', vehicleNumber: '', caseReference: '',
+    bloodGroup: '', phoneNumber: '', vehicleNumber: '', caseReference: '',
     emergencyContactName: '', emergencyContactPhone: ''
   });
 
@@ -35,7 +36,8 @@ const PoliceDashboard: React.FC<Props> = ({ activeCase, updateCase }) => {
       gender: activeCase.identity.gender || '',
       address: activeCase.identity.address || '',
       govIdType: activeCase.identity.govIdType || 'Aadhar',
-      govIdNumber: activeCase.identity.govIdNumber || '',
+      bloodGroup: activeCase.identity.bloodGroup || '',
+      phoneNumber: activeCase.identity.emergencyContactPhone || '',
       vehicleNumber: activeCase.identity.vehicleNumber || '',
       caseReference: activeCase.identity.caseReference || '',
       emergencyContactName: activeCase.identity.emergencyContactName || '',
@@ -59,8 +61,8 @@ const PoliceDashboard: React.FC<Props> = ({ activeCase, updateCase }) => {
   };
 
   const handleVerifyIdentity = () => {
-    if (!formData.name || !formData.govIdNumber) {
-      alert("Authorization Protocol Failure: Legal Full Name and Registry Number are mandatory.");
+    if (!formData.name) {
+      alert("Authorization Protocol Failure: Legal Full Name is mandatory.");
       return;
     }
     setAuthorizing(true);
@@ -68,17 +70,103 @@ const PoliceDashboard: React.FC<Props> = ({ activeCase, updateCase }) => {
     // Simulate realtime sync
     setTimeout(() => {
       updateCase({
-        identity: { ...activeCase.identity, ...formData, isPoliceVerified: true },
+        identity: {
+          ...activeCase.identity,
+          ...formData,
+          emergencyContactPhone: formData.phoneNumber || activeCase.identity.emergencyContactPhone,
+          bloodGroup: formData.bloodGroup || activeCase.identity.bloodGroup
+        },
         isUnknown: false,
         description: policeNotes ? `${activeCase.description || ''}\n[AUTH_LOG]: ${policeNotes}` : activeCase.description
       });
       setAuthorizing(false);
       setStatusMessage({ text: "Identity Authorized & Hospital Matrix Synced", type: 'success' });
       // Reset verification specific fields
-      setFormData(prev => ({ ...prev, govIdNumber: '', caseReference: '' }));
+      setFormData(prev => ({ ...prev, caseReference: '' }));
       setPoliceNotes('');
       setTimeout(() => setStatusMessage(null), 4000);
     }, 1500);
+  };
+
+  const handleDownloadAuthorizationReport = () => {
+    const doc = new jsPDF();
+    const lineHeight = 8;
+    let y = 20;
+
+    doc.setFontSize(18);
+    doc.text('Official Authorization Matrix', 14, y);
+    y += lineHeight + 4;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(14, y, 196, y);
+    y += lineHeight + 6;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Patient Name', 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(formData.name || activeCase.identity.name || '—', 14, y + lineHeight);
+    y += lineHeight * 2 + 4;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Age', 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(formData.age || activeCase.identity.age || '—', 14, y + lineHeight);
+    y += lineHeight * 2 + 2;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Gender', 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(formData.gender || activeCase.identity.gender || '—', 14, y + lineHeight);
+    y += lineHeight * 2 + 2;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Address', 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(formData.address || activeCase.identity.address || '—', 14, y + lineHeight);
+    y += lineHeight * 2 + 4;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Blood Group', 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(formData.bloodGroup || activeCase.identity.bloodGroup || '—', 14, y + lineHeight);
+    y += lineHeight * 2 + 2;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Phone Number', 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(formData.phoneNumber || activeCase.identity.emergencyContactPhone || '—', 14, y + lineHeight);
+    y += lineHeight * 2 + 4;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Government ID Type', 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(formData.govIdType || activeCase.identity.govIdType || '—', 14, y + lineHeight);
+    y += lineHeight * 2 + 2;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Vehicle Number', 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(formData.vehicleNumber || activeCase.identity.vehicleNumber || '—', 14, y + lineHeight);
+    y += lineHeight * 2 + 2;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Case Reference', 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(formData.caseReference || activeCase.identity.caseReference || '—', 14, y + lineHeight);
+    y += lineHeight * 2 + 6;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Police Verification Status', 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(activeCase.identity.isPoliceVerified ? 'Verified' : 'Pending', 14, y + lineHeight);
+    y += lineHeight * 2 + 2;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Timestamp', 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(new Date().toLocaleString(), 14, y + lineHeight);
+
+    doc.save(`authorization_report_${activeCase.id}.pdf`);
   };
 
   return (
@@ -308,16 +396,32 @@ const PoliceDashboard: React.FC<Props> = ({ activeCase, updateCase }) => {
 
                <div className="grid grid-cols-2 gap-5">
                   <div className="space-y-1 group">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Registry ID Type</label>
-                    <select value={formData.govIdType} onChange={(e) => handleInputChange('govIdType', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 font-black outline-none focus:bg-white appearance-none relative z-20 border-2 italic">
-                      <option value="Aadhar">National Registry</option>
-                      <option value="Passport">Global ID</option>
-                      <option value="Voter ID">Regional ID</option>
-                    </select>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Blood Group</label>
+                    <input type="text" value={formData.bloodGroup} onChange={(e) => handleInputChange('bloodGroup', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 font-black outline-none focus:bg-white relative z-20 border-2 italic" placeholder="A+ / O- / etc" />
                   </div>
                   <div className="space-y-1 group">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Registry UID</label>
-                    <input type="text" value={formData.govIdNumber} onChange={(e) => handleInputChange('govIdNumber', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 font-black outline-none focus:bg-white font-mono relative z-20 border-2 italic" placeholder="Unique ID..." />
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Phone Number</label>
+                    <input type="tel" value={formData.phoneNumber} onChange={(e) => handleInputChange('phoneNumber', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 font-black outline-none focus:bg-white relative z-20 border-2 italic" placeholder="+91 XXXXX XXXXX" />
+                  </div>
+               </div>
+
+               <div className="space-y-1 group">
+                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Registry ID Type</label>
+                 <select value={formData.govIdType} onChange={(e) => handleInputChange('govIdType', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 font-black outline-none focus:bg-white appearance-none relative z-20 border-2 italic">
+                   <option value="Aadhar">National Registry</option>
+                   <option value="Passport">Global ID</option>
+                   <option value="Voter ID">Regional ID</option>
+                 </select>
+               </div>
+
+               <div className="grid grid-cols-2 gap-5">
+                  <div className="space-y-1 group">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Vehicle Number</label>
+                    <input type="text" value={formData.vehicleNumber} onChange={(e) => handleInputChange('vehicleNumber', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 font-black outline-none focus:bg-white relative z-20 border-2 italic" placeholder="Vehicle..." />
+                  </div>
+                  <div className="space-y-1 group">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Case Reference</label>
+                    <input type="text" value={formData.caseReference} onChange={(e) => handleInputChange('caseReference', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 font-black outline-none focus:bg-white relative z-20 border-2 italic" placeholder="Case Reference..." />
                   </div>
                </div>
 
@@ -338,6 +442,15 @@ const PoliceDashboard: React.FC<Props> = ({ activeCase, updateCase }) => {
                >
                  {authorizing ? <Loader2 className="animate-spin" size={28} /> : <UserCheck2 size={28} />}
                  Authorize & Sync Identity Node
+               </button>
+
+               <button 
+                type="button"
+                onClick={handleDownloadAuthorizationReport}
+                className="w-full bg-slate-800 hover:bg-slate-900 text-white font-black py-6 rounded-[2.5rem] shadow-xl border border-slate-700 transition-all flex items-center justify-center gap-3 uppercase text-[11px] tracking-widest active:scale-[0.98]"
+               >
+                 <Download size={20} />
+                 Download Authorization Report (PDF)
                </button>
              </div>
           </div>

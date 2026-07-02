@@ -62,6 +62,18 @@ export interface Evidence {
   scenePhoto?: string;
 }
 
+export interface InjuryEvidence {
+  injuryImage?: File | null;
+}
+
+export interface OfficialAuthorization {
+  officerName: string;
+  badgeId: string;
+  stationName: string;
+  authorizationStatus: 'Verified' | 'Pending' | 'Rejected';
+  remarks: string;
+}
+
 export interface EmergencyCase {
   id: string;
   ambulanceId: string;
@@ -77,6 +89,8 @@ export interface EmergencyCase {
   geminiSummary?: string;
   description?: string;
   evidence: Evidence;
+  injuryEvidence?: InjuryEvidence;
+  officialAuthorization?: OfficialAuthorization;
   readiness: ReadinessStatus;
   createdAt: string;
 }

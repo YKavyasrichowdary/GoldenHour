@@ -51,6 +51,13 @@ const AmbulanceDashboard: React.FC<Props> = ({ activeCase, updateCase }) => {
     scenePhoto: useRef<HTMLInputElement>(null),
   };
 
+  const handleEtaChange = (value: string) => {
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue >= 0) {
+      updateCase({ eta: numValue });
+    }
+  };
+
   const handleVitalChange = (key: keyof Vitals, value: string) => {
     const numValue = parseFloat(value);
     if (!isNaN(numValue)) {
@@ -61,10 +68,15 @@ const AmbulanceDashboard: React.FC<Props> = ({ activeCase, updateCase }) => {
   };
 
   const sendMedicalToHospital = () => {
+    if (!activeCase.eta || activeCase.eta <= 0) {
+      alert("Clinical Sync Protocol: ETA to Hospital (minutes) is mandatory before dispatching the case to Hospital.");
+      return;
+    }
     // Sync Medical + Vitals to Hospital Node
     updateCase({ 
       medicalCondition: { ...medicalForm, lastUpdatedByEMS: new Date().toISOString(), medicalSentToHospital: true },
-      severity: activeCase.severity
+      severity: activeCase.severity,
+      eta: activeCase.eta
     });
     setStatusMessage({ text: "Clinical Data Sent to Hospital", type: 'success' });
     
@@ -207,6 +219,24 @@ const AmbulanceDashboard: React.FC<Props> = ({ activeCase, updateCase }) => {
                       </div>
                     </div>
                   ))}
+                </div>
+                <div className="mt-8">
+                  <div className="space-y-2 group max-w-xs">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1 italic group-focus-within:text-red-600 transition-colors">
+                      ETA to Hospital (minutes)
+                    </label>
+                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 group-focus-within:bg-white group-focus-within:border-red-400 group-focus-within:shadow-xl transition-all">
+                      <input
+                        type="number"
+                        min={0}
+                        value={Number.isFinite(activeCase.eta) && activeCase.eta > 0 ? activeCase.eta : ''}
+                        onChange={(e) => handleEtaChange(e.target.value)}
+                        className="bg-transparent text-3xl font-black text-slate-900 w-full outline-none cursor-text select-text"
+                        placeholder="0"
+                      />
+                      <span className="text-[9px] font-black text-slate-400 uppercase">Minutes to arrival</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 

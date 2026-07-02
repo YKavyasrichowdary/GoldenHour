@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { EmergencyCase, Severity, ReadinessStatus } from '../types';
-import { Activity, CheckCircle, User, Heart, Wind, Thermometer, AlertCircle, Info, Image, FileText, ShieldCheck } from 'lucide-react';
+import { Activity, CheckCircle, User, Heart, Wind, Thermometer, AlertCircle, Info, FileText, ShieldCheck, Clock } from 'lucide-react';
 import ImageModal from '../components/ImageModal';
 
 interface Props {
@@ -136,7 +136,7 @@ activeTab === tab.id
 
 {/* ADMISSION TAB */}
 
-{activeTab === 'info' && (
+          {activeTab === 'info' && (
 
 <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200">
 
@@ -144,53 +144,60 @@ activeTab === tab.id
 Clinical Intelligence Node
 </h2>
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-<div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
-
-<span className="text-[9px] font-black text-slate-400 uppercase block mb-4">
-Authenticated Identity Stream
-</span>
-
-<p className="text-2xl font-black">
-
-{activeCase.isUnknown
-? 'Forensic Inquiry: ' + activeCase.identity.temporaryId
-: activeCase.identity.name}
-
-</p>
-
-</div>
-
-<div
-onClick={() =>
-activeCase.evidence.patientPhoto &&
-setSelectedPhoto({
-src: activeCase.evidence.patientPhoto,
-title: 'Admission Biometric Capture'
-})
-}
-className="aspect-square bg-slate-100 rounded-[3rem] border overflow-hidden cursor-pointer"
->
-
-{activeCase.evidence.patientPhoto ? (
-
-<img
-src={activeCase.evidence.patientPhoto}
-className="w-full h-full object-cover"
-alt="Patient"
-/>
-
-) : (
-
-<div className="w-full h-full flex items-center justify-center text-slate-300">
-<Image size={48} />
-</div>
-
-)}
-
-</div>
-
+<div className="space-y-8">
+  <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
+    <span className="text-[9px] font-black text-slate-400 uppercase block mb-4">
+      Authenticated Identity Stream
+    </span>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Patient Name</p>
+        <p className="text-lg font-black text-slate-900">{activeCase.identity.name || '—'}</p>
+      </div>
+      <div>
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Age</p>
+        <p className="text-lg font-black text-slate-900">{activeCase.identity.age || '—'}</p>
+      </div>
+      <div>
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Gender</p>
+        <p className="text-lg font-black text-slate-900">{activeCase.identity.gender || '—'}</p>
+      </div>
+      <div>
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Blood Group</p>
+        <p className="text-lg font-black text-slate-900">{activeCase.identity.bloodGroup || '—'}</p>
+      </div>
+      <div className="md:col-span-2">
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Address</p>
+        <p className="text-lg font-black text-slate-900">{activeCase.identity.address || '—'}</p>
+      </div>
+      <div>
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Phone Number</p>
+        <p className="text-lg font-black text-slate-900 font-mono">{activeCase.identity.emergencyContactPhone || '—'}</p>
+      </div>
+      <div>
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Government ID Type</p>
+        <p className="text-lg font-black text-slate-900">{activeCase.identity.govIdType || '—'}</p>
+      </div>
+      <div>
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Government ID Number</p>
+        <p className="text-lg font-black text-slate-900 font-mono">{activeCase.identity.govIdNumber || '—'}</p>
+      </div>
+      <div>
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Vehicle Number</p>
+        <p className="text-lg font-black text-slate-900">{activeCase.identity.vehicleNumber || '—'}</p>
+      </div>
+      <div>
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Case Reference</p>
+        <p className="text-lg font-black text-slate-900">{activeCase.identity.caseReference || '—'}</p>
+      </div>
+      <div className="md:col-span-2">
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Police Verification Status</p>
+        <p className="text-lg font-black text-slate-900">
+          {activeCase.identity.isPoliceVerified ? 'Verified' : 'Pending'}
+        </p>
+      </div>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -259,18 +266,20 @@ EMS Administered Matrix
 Field Telemetry Feed
 </h2>
 
-<div className="grid grid-cols-2 md:grid-cols-4 gap-12 mt-10">
+<div className="grid grid-cols-2 md:grid-cols-5 gap-12 mt-10">
 
 {[
 { label: 'Pulse Rate', val: livePulse, unit: 'BPM' },
 { label: 'BP Systolic', val: activeCase.vitals.bp_sys, unit: 'mmHg' },
 { label: 'O2 Saturation', val: activeCase.vitals.spo2 + '%', unit: 'SpO2' },
-{ label: 'Core Temp', val: activeCase.vitals.temp, unit: '°C' }
+{ label: 'Core Temp', val: activeCase.vitals.temp, unit: '°C' },
+{ label: 'ETA', val: activeCase.eta, unit: 'mins', isEta: true }
 ].map((v) => (
 
-<div key={v.label}>
+<div key={v.label} className="flex flex-col gap-1">
+{v.isEta && <Clock className="text-slate-400" size={20} />}
 <div className="text-[10px] font-black uppercase">{v.label}</div>
-<div className="text-6xl font-black">{v.val || '--'}</div>
+<div className="text-6xl font-black">{v.val ?? '--'}</div>
 <div className="text-[10px] uppercase">{v.unit}</div>
 </div>
 
